@@ -1,0 +1,2 @@
+# Find Tractable Multitree Recolorabilities
+既存のアルゴリズムを用いて彩色遷移可能性を多項式時間で判定可能なマルチツリー遷移制約を列挙する．
