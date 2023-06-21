@@ -9,17 +9,29 @@ class DirectedGraph {
     DirectedGraph() = default;
 
     ~DirectedGraph() = default;
-    
+
     DirectedGraph(const std::vector<std::pair<int, int>>& edges_list,
                   int num_vertices);
 
+    int NumVertices() { return num_vertices_; }
+
+    int NumEdges() { return num_edges_; }
+
+    // Returns the outdegree of the vertex
     int OutDegree(int vertex);
 
+    // Returns the indegree of the vertex
     int InDegree(int vertex);
 
-    std::vector<std::vector<int>>
-    UnilaterallyConnectedComponents();  // This function work well only if graph
-                                        // is DAG
+    // Returns a vector of the edges of the graph
+    std::vector<std::pair<int, int>> Edges();
+
+    // Returns true when the graph is DAG
+    bool IsDAG();
+
+    // Returns unilaterally connected components of the graph.
+    // This function only work when the graph is DAG
+    std::vector<std::vector<int>> UnilaterallyConnectedComponents();
 
    private:
     int num_vertices_;
@@ -31,6 +43,8 @@ class DirectedGraph {
         return vertex < 0 || vertex >= num_vertices_;
     }
 
+    // Adds vertex to connected_components_list[component_index] and performs
+    // DFS.
     void PathSearch(int vertex,
                     std::vector<std::vector<int>>& connected_components_list,
                     int component_index);

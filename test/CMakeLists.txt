@@ -1,4 +1,4 @@
-set(TEST_SRC test_directed_graph.cpp)
+set(TEST_SRC test_directed_graph.cpp test_multitree_recolorability.cpp)
 
 include(FetchContent)
 FetchContent_Declare(
