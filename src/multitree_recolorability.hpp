@@ -21,6 +21,10 @@ class MultitreeRecolorability {
     // Returns true if and only if the multitree satisfies the condition Cycle.
     bool CheckConditionCycle();
 
+    bool CheckConditionCP();
+
+    bool CheckConditionCV();
+
    private:
     DirectedGraph multitree_;
 

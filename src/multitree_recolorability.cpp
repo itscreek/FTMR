@@ -65,6 +65,14 @@ bool MultitreeRecolorability::CheckConditionCycle() {
     return digraph.IsDAG();
 }
 
+bool MultitreeRecolorability::CheckConditionCP() {
+    return true;
+}
+
+bool MultitreeRecolorability::CheckConditionCV() {
+    return true;
+}
+
 void MultitreeRecolorability::ConstructPathRelationGraph() {
     std::vector<std::vector<int>> path_list;
     for (auto &component : unilaterally_connected_components_) {
