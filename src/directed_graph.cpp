@@ -120,6 +120,22 @@ std::vector<std::vector<int>> DirectedGraph::UnilaterallyConnectedComponents() {
     return connected_components_list;
 }
 
+DirectedGraph DirectedGraph::DeleteCyclesOfLength2() {
+    std::vector<std::pair<int, int>> result_edges;
+
+    for (int vertex = 0; vertex < num_vertices_; ++vertex) {
+        for (auto& adjacent_vertex : adjacency_list_[vertex]) {
+            if (std::find(adjacency_list_[adjacent_vertex].begin(),
+                          adjacency_list_[adjacent_vertex].end(),
+                          vertex) == adjacency_list_[adjacent_vertex].end()) {
+                result_edges.push_back({vertex, adjacent_vertex});
+            }
+        }
+    }
+
+    return DirectedGraph(result_edges, num_vertices_);
+}
+
 void DirectedGraph::PathSearch(
     int vertex, std::vector<std::vector<int>>& connected_components_list,
     int component_index) {

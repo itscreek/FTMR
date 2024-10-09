@@ -34,4 +34,15 @@ TEST(DirectedGraphTest, UnilaterallyConnectedComponents) {
         digraph.UnilaterallyConnectedComponents();
     ASSERT_EQ(expected_vector, result);
 }
+
+TEST(DirectedGraphTest, DeleteCyclesOfLength2) {
+    std::vector<std::pair<int, int>> edges = {
+        {0, 2}, {1, 0}, {2, 0}, {2, 3}, {2, 4}, {3, 1}, {3, 5}, {4, 5}, {5, 4}};
+    DirectedGraph digraph(edges, 6);
+    DirectedGraph result = digraph.DeleteCyclesOfLength2();
+
+    std::vector<std::pair<int, int>> expected_edges = {
+        {1, 0}, {2, 3}, {2, 4}, {3, 1}, {3, 5}};
+    ASSERT_EQ(expected_edges, result.Edges());
+}
 }  // namespace FTMR
