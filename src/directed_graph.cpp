@@ -120,6 +120,77 @@ std::vector<std::vector<int>> DirectedGraph::UnilaterallyConnectedComponents() {
     return connected_components_list;
 }
 
+std::vector<std::vector<int>> DirectedGraph::StronglyConnectedComponents() {
+    std::vector<std::vector<int>> connected_components_list;
+
+    std::vector<bool> visited_vertices(num_vertices_, false);
+    std::deque<int> visiting_vertices_stack;
+    std::deque<int> finished_vertices_stack;
+
+    for (int vertex = 0; vertex < num_vertices_; ++vertex) {
+        if (visited_vertices[vertex]) {
+            continue;
+        }
+        visiting_vertices_stack.push_back(vertex);
+
+        while (!visiting_vertices_stack.empty()) {
+            int visiting_vertex = visiting_vertices_stack.back();
+
+            if (!visited_vertices[visiting_vertex]) {
+                visited_vertices[visiting_vertex] = true;
+
+                for (auto& adjacent_vertex : adjacency_list_[visiting_vertex]) {
+                    if (!visited_vertices[adjacent_vertex]) {
+                        visiting_vertices_stack.push_back(adjacent_vertex);
+                    }
+                }
+            } else {
+                visiting_vertices_stack.pop_back();
+                finished_vertices_stack.push_back(visiting_vertex);
+            }
+        }
+    }
+
+    for (int vertex = 0; vertex < num_vertices_; ++vertex) {
+        visited_vertices[vertex] = false;
+    }
+    visiting_vertices_stack.clear();
+
+    for (auto itr = finished_vertices_stack.rbegin();
+         itr != finished_vertices_stack.rend(); ++itr) {
+        int vertex = *itr;
+        if (visited_vertices[vertex]) {
+            continue;
+        }
+        visiting_vertices_stack.push_back(vertex);
+
+        connected_components_list.push_back(std::vector<int>());
+        int component_index = connected_components_list.size() - 1;
+
+        while (!visiting_vertices_stack.empty()) {
+            int visiting_vertex = visiting_vertices_stack.back();
+
+            if (!visited_vertices[visiting_vertex]) {
+                visited_vertices[visiting_vertex] = true;
+
+                for (auto& adjacent_vertex :
+                     reverse_adjacency_list_[visiting_vertex]) {
+                    if (!visited_vertices[adjacent_vertex]) {
+                        visiting_vertices_stack.push_back(adjacent_vertex);
+                    }
+                }
+
+                connected_components_list[component_index].push_back(
+                    visiting_vertex);
+            } else {
+                visiting_vertices_stack.pop_back();
+            }
+        }
+    }
+
+    return connected_components_list;
+}
+
 DirectedGraph DirectedGraph::DeleteCyclesOfLength2() {
     std::vector<std::pair<int, int>> result_edges;
 

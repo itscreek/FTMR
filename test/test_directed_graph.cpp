@@ -1,3 +1,5 @@
+#include <unordered_set>
+
 #include "directed_graph.hpp"
 #include "gtest/gtest.h"
 
@@ -33,6 +35,27 @@ TEST(DirectedGraphTest, UnilaterallyConnectedComponents) {
     std::vector<std::vector<int>> result =
         digraph.UnilaterallyConnectedComponents();
     ASSERT_EQ(expected_vector, result);
+}
+
+TEST(DirectedGraphTest, StronglyConnectedComponents) {
+    const std::vector<std::pair<int, int>> edges = {
+        {0, 1}, {1, 2}, {2, 0}, {2, 3}, {3, 4}, {4, 3}, {4, 5}, {5, 4}};
+    DirectedGraph digraph(edges, 6);
+    std::vector<std::vector<int>> expected_vector = {{0, 1, 2}, {3, 4, 5}};
+    std::vector<std::vector<int>> result =
+        digraph.StronglyConnectedComponents();
+    ASSERT_EQ(expected_vector.size(), result.size());
+    for (int i = 0; i < expected_vector.size(); ++i) {
+        std::unordered_set<int> expected_components = std::unordered_set<int>(
+            expected_vector[i].begin(), expected_vector[i].end());
+        std::unordered_set<int> result_components =
+            std::unordered_set<int>(result[i].begin(), result[i].end());
+        ASSERT_EQ(expected_components, result_components);
+        for (auto& vertex : result_components) {
+            std::cout << vertex << " ";
+        }
+        std::cout << std::endl;
+    }
 }
 
 TEST(DirectedGraphTest, DeleteCyclesOfLength2) {

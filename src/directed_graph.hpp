@@ -33,6 +33,8 @@ class DirectedGraph {
     // This function only work when the graph is DAG
     std::vector<std::vector<int>> UnilaterallyConnectedComponents();
 
+    std::vector<std::vector<int>> StronglyConnectedComponents();
+
     DirectedGraph DeleteCyclesOfLength2();
 
    private:
