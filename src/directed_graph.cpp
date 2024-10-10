@@ -66,6 +66,15 @@ std::vector<std::pair<int, int>> DirectedGraph::Edges() {
     return edges;
 }
 
+bool DirectedGraph::IsAdjacent(int vertex1, int vertex2) {
+    if (InvalidVertexNumber(vertex1) || InvalidVertexNumber(vertex2)) {
+        throw std::invalid_argument("Vertex number must be 0 to n - 1.");
+    }
+    return std::find(adjacency_list_[vertex1].begin(),
+                     adjacency_list_[vertex1].end(),
+                     vertex2) != adjacency_list_[vertex1].end();
+}
+
 bool DirectedGraph::IsDAG() {
     enum struct VertexState { NOT_VISITED, VISITING, VISITED };
     std::vector<VertexState> vertex_state(num_vertices_,

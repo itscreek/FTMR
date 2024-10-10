@@ -33,6 +33,11 @@ TEST(MultitreeRecolorabilityTest, ConditionCP) {
         {0, 1}, {0, 2}, {2, 4}, {3, 2}, {4, 5}, {4, 6}, {7, 6}};
     MultitreeRecolorability satisfyingCP(edges1, 8);
     ASSERT_TRUE(satisfyingCP.CheckConditionCP());
+
+    const std::vector<std::pair<int, int>> edges2 = {
+        {0, 1}, {1, 2}, {2, 8}, {8, 3}, {3, 4}, {4, 5}, {2, 6}, {7, 3}};
+    MultitreeRecolorability not_satisfyingCP(edges2, 9);
+    ASSERT_FALSE(not_satisfyingCP.CheckConditionCP());
 }
 
 TEST(MultitreeRecolorabilityTest, ConditionCV) {

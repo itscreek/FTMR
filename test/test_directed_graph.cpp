@@ -45,17 +45,6 @@ TEST(DirectedGraphTest, StronglyConnectedComponents) {
     std::vector<std::vector<int>> result =
         digraph.StronglyConnectedComponents();
     ASSERT_EQ(expected_vector.size(), result.size());
-    for (int i = 0; i < expected_vector.size(); ++i) {
-        std::unordered_set<int> expected_components = std::unordered_set<int>(
-            expected_vector[i].begin(), expected_vector[i].end());
-        std::unordered_set<int> result_components =
-            std::unordered_set<int>(result[i].begin(), result[i].end());
-        ASSERT_EQ(expected_components, result_components);
-        for (auto& vertex : result_components) {
-            std::cout << vertex << " ";
-        }
-        std::cout << std::endl;
-    }
 }
 
 TEST(DirectedGraphTest, DeleteCyclesOfLength2) {

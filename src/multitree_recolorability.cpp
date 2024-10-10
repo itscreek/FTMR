@@ -18,6 +18,31 @@ MultitreeRecolorability::MultitreeRecolorability(
     ConstructPathRelationGraph();
 }
 
+int MultitreeRecolorability::GetPathNumber(std::pair<int, int> path) {
+    auto itr = std::find(path_relation_graph_vertices_.begin(),
+                         path_relation_graph_vertices_.end(), path);
+    if (itr != path_relation_graph_vertices_.end()) {
+        return std::distance(path_relation_graph_vertices_.begin(), itr);
+    }
+    return -1;
+}
+
+bool MultitreeRecolorability::IsReachable(int vertex_start, int vertex_end) {
+    if (unilaterally_connected_components_.size() == 0) {
+        unilaterally_connected_components_ =
+            multitree_.UnilaterallyConnectedComponents();
+    }
+
+    for (const auto &component : unilaterally_connected_components_) {
+        auto itr1 = std::find(component.begin(), component.end(), vertex_start);
+        auto itr2 = std::find(component.begin(), component.end(), vertex_end);
+        if (itr1 != component.end() && itr2 != component.end() && itr1 < itr2) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool MultitreeRecolorability::CheckConditionS() {
     for (const auto &component : unilaterally_connected_components_) {
         std::vector<int> merging_vertex_order;
@@ -65,13 +90,78 @@ bool MultitreeRecolorability::CheckConditionCycle() {
     return digraph.IsDAG();
 }
 
+int MultitreeRecolorability::GetNextStepPathNumber(int path_number) {
+    std::pair<int, int> path = GetPath(path_number);
+
+    if (path.first == path.second) {
+        return path_number;
+    }
+
+    for (auto &adjacent_vertex : multitree_.AdjacentVertices(path.first)) {
+        auto itr = std::find(path_relation_graph_vertices_.begin(),
+                             path_relation_graph_vertices_.end(),
+                             std::pair<int, int>(adjacent_vertex, path.second));
+        if (itr != path_relation_graph_vertices_.end()) {
+            return std::distance(path_relation_graph_vertices_.begin(), itr);
+        }
+    }
+    return path_number;
+}
+
 bool MultitreeRecolorability::CheckConditionCP() {
+    DirectedGraph path_relation_without_cycles =
+        path_relation_graph_.DeleteCyclesOfLength2();
+    std::vector<std::vector<int>> strongly_connected_components =
+        path_relation_without_cycles.StronglyConnectedComponents();
+
+    for (const auto &component : strongly_connected_components) {
+        for (auto &path_number : component) {
+            bool condition_cp_on_path =
+                CheckConditionCPOnPath(path_number, component);
+            if (!condition_cp_on_path) {
+                return false;
+            }
+        }
+    }
+
     return true;
 }
 
-bool MultitreeRecolorability::CheckConditionCV() {
+bool MultitreeRecolorability::CheckConditionCPOnPath(
+    int path_number, const std::vector<int> &component) {
+    int next_step_path_number = GetNextStepPathNumber(path_number);
+
+    for (auto &adjacent_path_number :
+         path_relation_graph_.AdjacentVertices(path_number)) {
+        if (std::find(component.begin(), component.end(),
+                      adjacent_path_number) == component.end()) {
+            continue;
+        }
+
+        for (auto &radjacent_path_number :
+             path_relation_graph_.ReverseAdjacentVertices(path_number)) {
+            if (std::find(component.begin(), component.end(),
+                          radjacent_path_number) == component.end()) {
+                continue;
+            }
+
+            bool cycle2_appear = path_relation_graph_.IsAdjacent(
+                adjacent_path_number, next_step_path_number);
+
+            bool cycle_persist =
+                IsReachable(GetPath(next_step_path_number).first,
+                            GetPath(radjacent_path_number).second);
+
+            if (!cycle2_appear && !cycle_persist) {
+                return false;
+            }
+        }
+    }
+
     return true;
 }
+
+bool MultitreeRecolorability::CheckConditionCV() { return true; }
 
 void MultitreeRecolorability::ConstructPathRelationGraph() {
     std::vector<std::vector<int>> path_list;

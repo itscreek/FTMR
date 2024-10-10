@@ -26,6 +26,16 @@ class DirectedGraph {
     // Returns a vector of the edges of the graph
     std::vector<std::pair<int, int>> Edges();
 
+    std::vector<int> AdjacentVertices(int vertex) {
+        return adjacency_list_[vertex];
+    }
+
+    std::vector<int> ReverseAdjacentVertices(int vertex) {
+        return reverse_adjacency_list_[vertex];
+    }
+
+    bool IsAdjacent(int vertex1, int vertex2);
+
     // Returns true when the graph is DAG
     bool IsDAG();
 
