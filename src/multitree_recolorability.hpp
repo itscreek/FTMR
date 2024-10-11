@@ -49,6 +49,8 @@ class MultitreeRecolorability {
 
     bool CheckConditionCPOnPath(int path_number,
                                 const std::vector<int>& component);
+
+    bool CheckConditionCVOnPathCycle(std::vector<int> path_cycle);
 };
 
 }  // namespace FTMR

@@ -46,5 +46,10 @@ TEST(MultitreeRecolorabilityTest, ConditionCV) {
         {5, 7}, {5, 6}, {8, 6}, {9, 4}, {9, 8}};
     MultitreeRecolorability satisfyingCV(edges1, 10);
     ASSERT_TRUE(satisfyingCV.CheckConditionCV());
+
+    const std::vector<std::pair<int, int>> edges2 = {
+        {0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {2, 6}, {7, 3}};
+    MultitreeRecolorability not_satisfyingCV(edges2, 8);
+    ASSERT_FALSE(not_satisfyingCV.CheckConditionCV());
 }
 }  // namespace FTMR
