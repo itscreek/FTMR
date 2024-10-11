@@ -18,6 +18,31 @@ MultitreeRecolorability::MultitreeRecolorability(
     ConstructPathRelationGraph();
 }
 
+int MultitreeRecolorability::GetPathNumber(std::pair<int, int> path) {
+    auto itr = std::find(path_relation_graph_vertices_.begin(),
+                         path_relation_graph_vertices_.end(), path);
+    if (itr != path_relation_graph_vertices_.end()) {
+        return std::distance(path_relation_graph_vertices_.begin(), itr);
+    }
+    return -1;
+}
+
+bool MultitreeRecolorability::IsReachable(int vertex_start, int vertex_end) {
+    if (unilaterally_connected_components_.size() == 0) {
+        unilaterally_connected_components_ =
+            multitree_.UnilaterallyConnectedComponents();
+    }
+
+    for (const auto &component : unilaterally_connected_components_) {
+        auto itr1 = std::find(component.begin(), component.end(), vertex_start);
+        auto itr2 = std::find(component.begin(), component.end(), vertex_end);
+        if (itr1 != component.end() && itr2 != component.end() && itr1 < itr2) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool MultitreeRecolorability::CheckConditionS() {
     for (const auto &component : unilaterally_connected_components_) {
         std::vector<int> merging_vertex_order;
@@ -65,11 +90,118 @@ bool MultitreeRecolorability::CheckConditionCycle() {
     return digraph.IsDAG();
 }
 
+int MultitreeRecolorability::GetNextStepPathNumber(int path_number) {
+    std::pair<int, int> path = GetPath(path_number);
+
+    if (path.first == path.second) {
+        return path_number;
+    }
+
+    for (auto &adjacent_vertex : multitree_.AdjacentVertices(path.first)) {
+        auto itr = std::find(path_relation_graph_vertices_.begin(),
+                             path_relation_graph_vertices_.end(),
+                             std::pair<int, int>(adjacent_vertex, path.second));
+        if (itr != path_relation_graph_vertices_.end()) {
+            return std::distance(path_relation_graph_vertices_.begin(), itr);
+        }
+    }
+    return path_number;
+}
+
+bool MultitreeRecolorability::CheckConditionCP() {
+    DirectedGraph path_relation_without_cycles =
+        path_relation_graph_.DeleteCyclesOfLength2();
+    std::vector<std::vector<int>> strongly_connected_components =
+        path_relation_without_cycles.StronglyConnectedComponents();
+
+    for (const auto &component : strongly_connected_components) {
+        for (auto &path_number : component) {
+            bool condition_cp_on_path =
+                CheckConditionCPOnPath(path_number, component);
+            if (!condition_cp_on_path) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+/* Check (CP) for the path with "path_number" */
+bool MultitreeRecolorability::CheckConditionCPOnPath(
+    int path_number, const std::vector<int> &component) {
+    int next_step_path_number = GetNextStepPathNumber(path_number);
+
+    // Check for all adjacent paths
+    for (auto &adjacent_path_number :
+         path_relation_graph_.AdjacentVertices(path_number)) {
+        if (std::find(component.begin(), component.end(),
+                      adjacent_path_number) == component.end()) {
+            continue;
+        }
+
+        for (auto &radjacent_path_number :
+             path_relation_graph_.ReverseAdjacentVertices(path_number)) {
+            if (std::find(component.begin(), component.end(),
+                          radjacent_path_number) == component.end()) {
+                continue;
+            }
+
+            bool cycle2_appear = path_relation_graph_.IsAdjacent(
+                adjacent_path_number, next_step_path_number);
+
+            bool cycle_persist =
+                IsReachable(GetPath(next_step_path_number).first,
+                            GetPath(radjacent_path_number).second);
+
+            if (!cycle2_appear && !cycle_persist) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool MultitreeRecolorability::CheckConditionCV() {
+    DirectedGraph path_relation_without_cycles =
+        path_relation_graph_.DeleteCyclesOfLength2();
+    std::vector<std::vector<int>> simple_path_cycles =
+        path_relation_without_cycles.SimpleCycles();
+
+    for (auto &path_cycle : simple_path_cycles) {
+        bool condition_cv_on_path_cycle =
+            CheckConditionCVOnPathCycle(path_cycle);
+        if (!condition_cv_on_path_cycle) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/* Check (CP) for a cycle */
+bool MultitreeRecolorability::CheckConditionCVOnPathCycle(
+    std::vector<int> path_cycle) {
+    // path_cycle starts and ends with the same vertex
+    // example of a path_cycle: 0 -> 1 -> 2 -> 3 -> 0
+    for (int i = 0; i < path_cycle.size() - 1; ++i) {
+        int path_number = path_cycle[i];
+        int adjacent_path_number = path_cycle[i + 1];
+        int next_step_path_number = GetNextStepPathNumber(path_number);
+
+        if (!path_relation_graph_.IsAdjacent(adjacent_path_number,
+                                             next_step_path_number)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void MultitreeRecolorability::ConstructPathRelationGraph() {
     std::vector<std::vector<int>> path_list;
     for (auto &component : unilaterally_connected_components_) {
         for (int i = 0; i < component.size(); ++i) {
-            for (int j = i + 1; j < component.size(); ++j) {
+            for (int j = i; j < component.size(); ++j) {
                 std::pair<int, int> path(component[i], component[j]);
                 if (std::find(path_relation_graph_vertices_.begin(),
                               path_relation_graph_vertices_.end(),
@@ -101,9 +233,7 @@ void MultitreeRecolorability::ConstructPathRelationGraph() {
                           path_list[vertex2_index].end(),
                           prg_vertex1.second) != path_list[vertex2_index].end();
 
-            if (prg_vertex1.first != prg_vertex2.first &&
-                prg_vertex1.second != prg_vertex2.second &&
-                (prg_v2_first_in_prg_v1 || prg_v1_second_in_prg_v2)) {
+            if (prg_v2_first_in_prg_v1 || prg_v1_second_in_prg_v2) {
                 edges.push_back({vertex1_index, vertex2_index});
             }
 
