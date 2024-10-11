@@ -34,7 +34,7 @@ DirectedGraph::DirectedGraph(const std::vector<std::pair<int, int>>& edges_list,
     }
 }
 
-int DirectedGraph::OutDegree(int vertex) {
+int DirectedGraph::OutDegree(int vertex) const {
     if (InvalidVertexNumber(vertex)) {
         throw std::invalid_argument("Vertex number must be 0 to n - 1.");
     }
@@ -42,7 +42,7 @@ int DirectedGraph::OutDegree(int vertex) {
     return adjacency_list_[vertex].size();
 }
 
-int DirectedGraph::InDegree(int vertex) {
+int DirectedGraph::InDegree(int vertex) const {
     if (InvalidVertexNumber(vertex)) {
         throw std::invalid_argument("Vertex number must be 0 to n - 1.");
     }
@@ -50,7 +50,7 @@ int DirectedGraph::InDegree(int vertex) {
     return reverse_adjacency_list_[vertex].size();
 }
 
-std::vector<std::pair<int, int>> DirectedGraph::Edges() {
+std::vector<std::pair<int, int>> DirectedGraph::Edges() const {
     std::vector<std::pair<int, int>> edges(num_edges_);
 
     int count = 0;
@@ -66,7 +66,7 @@ std::vector<std::pair<int, int>> DirectedGraph::Edges() {
     return edges;
 }
 
-bool DirectedGraph::IsAdjacent(int vertex1, int vertex2) {
+bool DirectedGraph::IsAdjacent(int vertex1, int vertex2) const {
     if (InvalidVertexNumber(vertex1) || InvalidVertexNumber(vertex2)) {
         throw std::invalid_argument("Vertex number must be 0 to n - 1.");
     }
@@ -75,7 +75,7 @@ bool DirectedGraph::IsAdjacent(int vertex1, int vertex2) {
                      vertex2) != adjacency_list_[vertex1].end();
 }
 
-bool DirectedGraph::IsDAG() {
+bool DirectedGraph::IsDAG() const {
     enum struct VertexState { NOT_VISITED, VISITING, VISITED };
     std::vector<VertexState> vertex_state(num_vertices_,
                                           VertexState::NOT_VISITED);
@@ -115,7 +115,8 @@ bool DirectedGraph::IsDAG() {
     return true;
 }
 
-std::vector<std::vector<int>> DirectedGraph::UnilaterallyConnectedComponents() {
+std::vector<std::vector<int>> DirectedGraph::UnilaterallyConnectedComponents()
+    const {
     std::vector<std::vector<int>> connected_components_list;
 
     for (int vertex = 0; vertex < num_vertices_; ++vertex) {
@@ -129,7 +130,8 @@ std::vector<std::vector<int>> DirectedGraph::UnilaterallyConnectedComponents() {
     return connected_components_list;
 }
 
-std::vector<std::vector<int>> DirectedGraph::StronglyConnectedComponents() {
+std::vector<std::vector<int>> DirectedGraph::StronglyConnectedComponents()
+    const {
     std::vector<std::vector<int>> connected_components_list;
 
     std::vector<bool> visited_vertices(num_vertices_, false);
@@ -200,7 +202,7 @@ std::vector<std::vector<int>> DirectedGraph::StronglyConnectedComponents() {
     return connected_components_list;
 }
 
-std::vector<std::vector<int>> DirectedGraph::SimpleCycles() {
+std::vector<std::vector<int>> DirectedGraph::SimpleCycles() const {
     std::unordered_set<int> blocked_set;
     std::unordered_map<int, std::unordered_set<int>> blocked_map;
     std::deque<int> stack;
@@ -229,7 +231,8 @@ std::vector<std::vector<int>> DirectedGraph::SimpleCycles() {
     return cycles;
 }
 
-DirectedGraph DirectedGraph::CreateSubgraph(const std::vector<int>& vertices) {
+DirectedGraph DirectedGraph::CreateSubgraph(
+    const std::vector<int>& vertices) const {
     std::unordered_set<int> vertices_set(vertices.begin(), vertices.end());
     std::vector<std::pair<int, int>> result_edges;
 
@@ -244,7 +247,7 @@ DirectedGraph DirectedGraph::CreateSubgraph(const std::vector<int>& vertices) {
     return DirectedGraph(result_edges, num_vertices_);
 }
 
-DirectedGraph DirectedGraph::DeleteCyclesOfLength2() {
+DirectedGraph DirectedGraph::DeleteCyclesOfLength2() const {
     std::vector<std::pair<int, int>> result_edges;
 
     for (int vertex = 0; vertex < num_vertices_; ++vertex) {
@@ -262,7 +265,7 @@ DirectedGraph DirectedGraph::DeleteCyclesOfLength2() {
 
 void DirectedGraph::PathSearch(
     int vertex, std::vector<std::vector<int>>& connected_components_list,
-    int component_index) {
+    int component_index) const {
     connected_components_list[component_index].push_back(vertex);
     std::vector<int> current_component(
         connected_components_list[component_index]);
@@ -289,7 +292,8 @@ void DirectedGraph::PathSearch(
 
 void DirectedGraph::UnBlockJohnson(
     std::unordered_set<int>& blocked_set,
-    std::unordered_map<int, std::unordered_set<int>>& blocked_map, int vertex) {
+    std::unordered_map<int, std::unordered_set<int>>& blocked_map,
+    int vertex) const {
     blocked_set.erase(vertex);
     if (blocked_map.count(vertex) > 0) {
         for (auto& blocked_vertex : blocked_map[vertex]) {
@@ -302,10 +306,10 @@ void DirectedGraph::UnBlockJohnson(
 }
 
 bool DirectedGraph::FindCyclesInSCCJohnson(
-    DirectedGraph& scc_graph, std::unordered_set<int>& blocked_set,
+    const DirectedGraph& scc_graph, std::unordered_set<int>& blocked_set,
     std::unordered_map<int, std::unordered_set<int>>& blocked_map,
     std::deque<int>& stack, std::vector<std::vector<int>>& cycles,
-    int start_vertex, int current_vertex) {
+    int start_vertex, int current_vertex) const {
     bool found_cycle = false;
     stack.push_back(current_vertex);
     blocked_set.insert(current_vertex);
