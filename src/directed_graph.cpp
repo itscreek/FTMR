@@ -200,6 +200,50 @@ std::vector<std::vector<int>> DirectedGraph::StronglyConnectedComponents() {
     return connected_components_list;
 }
 
+std::vector<std::vector<int>> DirectedGraph::SimpleCycles() {
+    std::unordered_set<int> blocked_set;
+    std::unordered_map<int, std::unordered_set<int>> blocked_map;
+    std::deque<int> stack;
+    std::vector<std::vector<int>> cycles;
+
+    std::vector<std::vector<int>> strongly_connected_components =
+        StronglyConnectedComponents();
+
+    for (auto& component : strongly_connected_components) {
+        if (component.size() == 1) {
+            continue;
+        }
+
+        std::sort(component.begin(), component.end());
+        for (int i = 0; i < component.size(); ++i) {
+            blocked_set.clear();
+            blocked_map.clear();
+            stack.clear();
+            DirectedGraph search_graph = CreateSubgraph(
+                std::vector<int>(component.begin() + i, component.end()));
+            FindCyclesInSCCJohnson(search_graph, blocked_set, blocked_map,
+                                   stack, cycles, component[i], component[i]);
+        }
+    }
+
+    return cycles;
+}
+
+DirectedGraph DirectedGraph::CreateSubgraph(const std::vector<int>& vertices) {
+    std::unordered_set<int> vertices_set(vertices.begin(), vertices.end());
+    std::vector<std::pair<int, int>> result_edges;
+
+    for (auto& vertex : vertices) {
+        for (auto& adjacent_vertex : adjacency_list_[vertex]) {
+            if (vertices_set.count(adjacent_vertex)) {
+                result_edges.push_back({vertex, adjacent_vertex});
+            }
+        }
+    }
+
+    return DirectedGraph(result_edges, num_vertices_);
+}
+
 DirectedGraph DirectedGraph::DeleteCyclesOfLength2() {
     std::vector<std::pair<int, int>> result_edges;
 
@@ -241,5 +285,66 @@ void DirectedGraph::PathSearch(
                        connected_components_list.size() - 1);
         }
     }
+}
+
+void DirectedGraph::UnBlockJohnson(
+    std::unordered_set<int>& blocked_set,
+    std::unordered_map<int, std::unordered_set<int>>& blocked_map, int vertex) {
+    blocked_set.erase(vertex);
+    if (blocked_map.count(vertex) > 0) {
+        for (auto& blocked_vertex : blocked_map[vertex]) {
+            if (blocked_set.count(blocked_vertex) > 0) {
+                UnBlockJohnson(blocked_set, blocked_map, blocked_vertex);
+            }
+        }
+        blocked_map.erase(vertex);
+    }
+}
+
+bool DirectedGraph::FindCyclesInSCCJohnson(
+    DirectedGraph& scc_graph, std::unordered_set<int>& blocked_set,
+    std::unordered_map<int, std::unordered_set<int>>& blocked_map,
+    std::deque<int>& stack, std::vector<std::vector<int>>& cycles,
+    int start_vertex, int current_vertex) {
+    bool found_cycle = false;
+    stack.push_back(current_vertex);
+    blocked_set.insert(current_vertex);
+
+    for (auto& adjacent_vertex : scc_graph.AdjacentVertices(current_vertex)) {
+        if (adjacent_vertex < start_vertex) {
+            continue;
+        }
+
+        if (adjacent_vertex == start_vertex) {
+            stack.push_back(start_vertex);
+            std::vector<int> cycle(stack.begin(), stack.end());
+            cycles.push_back(cycle);
+            stack.pop_back();
+            found_cycle = true;
+        } else if (blocked_set.count(adjacent_vertex) == 0) {
+            bool got_cycle = FindCyclesInSCCJohnson(
+                scc_graph, blocked_set, blocked_map, stack, cycles,
+                start_vertex, adjacent_vertex);
+            found_cycle = found_cycle || got_cycle;
+        }
+    }
+
+    if (found_cycle) {
+        UnBlockJohnson(blocked_set, blocked_map, current_vertex);
+    } else {
+        for (auto& adjacent_vertex :
+             scc_graph.AdjacentVertices(current_vertex)) {
+            if (adjacent_vertex < start_vertex) {
+                continue;
+            }
+
+            if (blocked_map.count(adjacent_vertex) == 0) {
+                blocked_map[adjacent_vertex] = std::unordered_set<int>();
+            }
+            blocked_map[adjacent_vertex].insert(current_vertex);
+        }
+    }
+    stack.pop_back();
+    return found_cycle;
 }
 }  // namespace FTMR

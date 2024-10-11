@@ -1,5 +1,8 @@
 #pragma once
 
+#include <deque>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -45,6 +48,10 @@ class DirectedGraph {
 
     std::vector<std::vector<int>> StronglyConnectedComponents();
 
+    std::vector<std::vector<int>> SimpleCycles();
+
+    DirectedGraph CreateSubgraph(const std::vector<int>& vertices);
+
     DirectedGraph DeleteCyclesOfLength2();
 
    private:
@@ -62,5 +69,16 @@ class DirectedGraph {
     void PathSearch(int vertex,
                     std::vector<std::vector<int>>& connected_components_list,
                     int component_index);
+
+    void UnBlockJohnson(
+        std::unordered_set<int>& blocked_set,
+        std::unordered_map<int, std::unordered_set<int>>& blocked_map,
+        int vertex);
+
+    bool FindCyclesInSCCJohnson(
+        DirectedGraph& scc_graph, std::unordered_set<int>& blocked_set,
+        std::unordered_map<int, std::unordered_set<int>>& blocked_map,
+        std::deque<int>& stack, std::vector<std::vector<int>>& cycles,
+        int start_vertex, int current_vertex);
 };
 }  // namespace FTMR
