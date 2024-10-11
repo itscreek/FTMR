@@ -127,10 +127,12 @@ bool MultitreeRecolorability::CheckConditionCP() {
     return true;
 }
 
+/* Check (CP) for the path with "path_number" */
 bool MultitreeRecolorability::CheckConditionCPOnPath(
     int path_number, const std::vector<int> &component) {
     int next_step_path_number = GetNextStepPathNumber(path_number);
 
+    // Check for all adjacent paths
     for (auto &adjacent_path_number :
          path_relation_graph_.AdjacentVertices(path_number)) {
         if (std::find(component.begin(), component.end(),
@@ -177,6 +179,7 @@ bool MultitreeRecolorability::CheckConditionCV() {
     return true;
 }
 
+/* Check (CP) for a cycle */
 bool MultitreeRecolorability::CheckConditionCVOnPathCycle(
     std::vector<int> path_cycle) {
     // path_cycle starts and ends with the same vertex

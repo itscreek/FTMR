@@ -130,6 +130,7 @@ std::vector<std::vector<int>> DirectedGraph::UnilaterallyConnectedComponents()
     return connected_components_list;
 }
 
+/* Get strongly connected components using Kosaraju’s algorithm */
 std::vector<std::vector<int>> DirectedGraph::StronglyConnectedComponents()
     const {
     std::vector<std::vector<int>> connected_components_list;
@@ -305,6 +306,8 @@ void DirectedGraph::UnBlockJohnson(
     }
 }
 
+/* Find all simple cycles starting with start_vertex using Johnson's algorithm
+ */
 bool DirectedGraph::FindCyclesInSCCJohnson(
     const DirectedGraph& scc_graph, std::unordered_set<int>& blocked_set,
     std::unordered_map<int, std::unordered_set<int>>& blocked_map,
