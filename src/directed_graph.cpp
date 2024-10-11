@@ -91,6 +91,17 @@ bool DirectedGraph::IsDAG() const {
         while (!visiting_order_stack.empty()) {
             int visiting_vertex = visiting_order_stack.front();
 
+            if (vertex_state[visiting_vertex] == VertexState::VISITED) {
+                visiting_order_stack.pop_front();
+                continue;
+            }
+
+            if (vertex_state[visiting_vertex] == VertexState::VISITING) {
+                visiting_order_stack.pop_front();
+                vertex_state[visiting_vertex] = VertexState::VISITED;
+                continue;
+            }
+
             if (vertex_state[visiting_vertex] == VertexState::NOT_VISITED) {
                 vertex_state[visiting_vertex] = VertexState::VISITING;
 
@@ -105,9 +116,6 @@ bool DirectedGraph::IsDAG() const {
                         return false;
                     }
                 }
-            } else if (vertex_state[visiting_vertex] == VertexState::VISITING) {
-                visiting_order_stack.pop_front();
-                vertex_state[visiting_vertex] = VertexState::VISITED;
             }
         }
     }
