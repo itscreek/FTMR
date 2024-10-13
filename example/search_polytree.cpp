@@ -138,7 +138,12 @@ void SearchAllPolytrees(int num_vertices) {
 }
 }  // namespace FTMRSearch
 
-int main() {
-    int num_vertices = 11;
+int main(int argc, char* argv[]) {
+    if (argc == 1 || argc > 2) {
+        std::cout << "Invalid arguments." << std::endl;
+        return 0;
+    }
+
+    int num_vertices = std::stoi(argv[1]);
     FTMRSearch::SearchAllPolytrees(num_vertices);
 }
