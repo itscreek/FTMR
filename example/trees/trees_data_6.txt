@@ -1,0 +1,24 @@
+
+Graph 1, order 6.
+6 5
+0 5  1 5  2 5  3 5  4 5
+
+Graph 2, order 6.
+6 5
+0 4  0 5  1 5  2 5  3 5
+
+Graph 3, order 6.
+6 5
+0 4  0 5  1 4  2 5  3 5
+
+Graph 4, order 6.
+6 5
+0 4  1 4  2 5  3 5  4 5
+
+Graph 5, order 6.
+6 5
+0 3  0 5  1 4  1 5  2 5
+
+Graph 6, order 6.
+6 5
+0 3  0 5  1 4  1 5  2 4
