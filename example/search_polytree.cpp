@@ -43,7 +43,7 @@ std::vector<EdgesList> GetTrees(int num_vertices) {
 
     std::ifstream file(filename);
     if (!file) {
-        std::cerr << "Trees file not found" << std::endl;
+        std::cerr << "Trees file not found." << std::endl;
         return trees_list;
     }
     std::string line;
@@ -98,6 +98,10 @@ void SearchAllPolytrees(int num_vertices) {
     std::cout << "Running..." << std::endl;
 
     std::vector<EdgesList> trees_list = GetTrees(num_vertices);
+
+    if (trees_list.size() == 0) {
+        return;
+    }
 
     int num_s = 0;
     int num_cp_not_s = 0;
