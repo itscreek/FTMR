@@ -10,9 +10,11 @@ cmake --build build
 ```
 
 ## Finding tractable polytree recolorabilities
+
 You can examines every polytree with `n` vertices to determine if it meets the conditions (S), (CP) and (CV).
+
 ```
-source example/find_tractable_polytrees.sh n
+./example/find_tractable_polytrees.sh n
 ```
 
 ## Test
