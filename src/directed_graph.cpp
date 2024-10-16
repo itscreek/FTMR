@@ -144,67 +144,25 @@ std::vector<std::vector<int>> DirectedGraph::StronglyConnectedComponents()
     std::vector<std::vector<int>> connected_components_list;
 
     std::vector<bool> visited_vertices(num_vertices_, false);
-    std::deque<int> visiting_vertices_stack;
     std::deque<int> finished_vertices_stack;
 
     for (int vertex = 0; vertex < num_vertices_; ++vertex) {
-        if (visited_vertices[vertex]) {
-            continue;
-        }
-        visiting_vertices_stack.push_back(vertex);
-
-        while (!visiting_vertices_stack.empty()) {
-            int visiting_vertex = visiting_vertices_stack.back();
-
-            if (!visited_vertices[visiting_vertex]) {
-                visited_vertices[visiting_vertex] = true;
-
-                for (auto& adjacent_vertex : adjacency_list_[visiting_vertex]) {
-                    if (!visited_vertices[adjacent_vertex]) {
-                        visiting_vertices_stack.push_back(adjacent_vertex);
-                    }
-                }
-            } else {
-                visiting_vertices_stack.pop_back();
-                finished_vertices_stack.push_back(visiting_vertex);
-            }
+        if (!visited_vertices[vertex]) {
+            DFSForSCC(visited_vertices, finished_vertices_stack, vertex);
         }
     }
 
     for (int vertex = 0; vertex < num_vertices_; ++vertex) {
         visited_vertices[vertex] = false;
     }
-    visiting_vertices_stack.clear();
 
     for (auto itr = finished_vertices_stack.rbegin();
          itr != finished_vertices_stack.rend(); ++itr) {
         int vertex = *itr;
-        if (visited_vertices[vertex]) {
-            continue;
-        }
-        visiting_vertices_stack.push_back(vertex);
-
-        connected_components_list.push_back(std::vector<int>());
-        int component_index = connected_components_list.size() - 1;
-
-        while (!visiting_vertices_stack.empty()) {
-            int visiting_vertex = visiting_vertices_stack.back();
-
-            if (!visited_vertices[visiting_vertex]) {
-                visited_vertices[visiting_vertex] = true;
-
-                for (auto& adjacent_vertex :
-                     reverse_adjacency_list_[visiting_vertex]) {
-                    if (!visited_vertices[adjacent_vertex]) {
-                        visiting_vertices_stack.push_back(adjacent_vertex);
-                    }
-                }
-
-                connected_components_list[component_index].push_back(
-                    visiting_vertex);
-            } else {
-                visiting_vertices_stack.pop_back();
-            }
+        if (!visited_vertices[vertex]) {
+            connected_components_list.push_back(std::vector<int>());
+            ReverseDFSForSCC(visited_vertices, connected_components_list.back(),
+                             vertex);
         }
     }
 
@@ -295,6 +253,30 @@ void DirectedGraph::PathSearch(
                 std::vector<int>(current_component));
             PathSearch(adjacent_vertex, connected_components_list,
                        connected_components_list.size() - 1);
+        }
+    }
+}
+
+void DirectedGraph::DFSForSCC(std::vector<bool>& is_visited,
+                              std::deque<int>& finished_vertices,
+                              int vertex) const {
+    is_visited[vertex] = true;
+    for (auto& adjacent_vertex : adjacency_list_[vertex]) {
+        if (!is_visited[adjacent_vertex]) {
+            DFSForSCC(is_visited, finished_vertices, adjacent_vertex);
+        }
+    }
+    finished_vertices.push_back(vertex);
+}
+
+void DirectedGraph::ReverseDFSForSCC(std::vector<bool>& is_visited,
+                                     std::vector<int>& component,
+                                     int vertex) const {
+    is_visited[vertex] = true;
+    component.push_back(vertex);
+    for (auto& radjacent_vertex : reverse_adjacency_list_[vertex]) {
+        if (!is_visited[radjacent_vertex]) {
+            ReverseDFSForSCC(is_visited, component, radjacent_vertex);
         }
     }
 }

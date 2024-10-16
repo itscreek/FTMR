@@ -70,6 +70,12 @@ class DirectedGraph {
                     std::vector<std::vector<int>>& connected_components_list,
                     int component_index) const;
 
+    void DFSForSCC(std::vector<bool>& is_visited,
+                   std::deque<int>& finished_vertices, int vertex) const;
+
+    void ReverseDFSForSCC(std::vector<bool>& is_visited,
+                          std::vector<int>& component, int vertex) const;
+
     void UnBlockJohnson(
         std::unordered_set<int>& blocked_set,
         std::unordered_map<int, std::unordered_set<int>>& blocked_map,
