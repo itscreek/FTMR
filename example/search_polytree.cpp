@@ -17,7 +17,7 @@ constexpr char kTreesFileName[] = "trees_data";
 enum class TypeOfPolytree {
     kS,
     kCPNotS,
-    kCV,
+    kCVNotCP,
     kNotTractable,
 };
 
@@ -29,7 +29,7 @@ TypeOfPolytree ClassifyMultitree(const std::vector<std::pair<int, int>>& edges,
     } else if (multitree.CheckConditionCP()) {
         return TypeOfPolytree::kCPNotS;
     } else if (multitree.CheckConditionCV()) {
-        return TypeOfPolytree::kCV;
+        return TypeOfPolytree::kCVNotCP;
     } else {
         return TypeOfPolytree::kNotTractable;
     }
@@ -121,7 +121,7 @@ void SearchAllPolytrees(int num_vertices) {
                 case TypeOfPolytree::kCPNotS:
                     ++num_cp_not_s;
                     break;
-                case TypeOfPolytree::kCV:
+                case TypeOfPolytree::kCVNotCP:
                     ++num_cv;
                     break;
                 case TypeOfPolytree::kNotTractable:
@@ -137,7 +137,7 @@ void SearchAllPolytrees(int num_vertices) {
               << " polytrees." << std::endl;
     std::cout << "    Satisfying (S): " << num_s << std::endl;
     std::cout << "    Satisfying (CP) not (S): " << num_cp_not_s << std::endl;
-    std::cout << "    Satisfying (CV): " << num_cv << std::endl;
+    std::cout << "    Satisfying (CV) not (CP): " << num_cv << std::endl;
     std::cout << "    Others: " << num_not_tractable << std::endl;
 }
 }  // namespace FTMRSearch
