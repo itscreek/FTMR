@@ -15,12 +15,6 @@ class MultitreeRecolorability {
     MultitreeRecolorability(const std::vector<std::pair<int, int>>& edges,
                             int num_vertices);
 
-    std::pair<int, int> GetPath(int path_number) {
-        return path_relation_graph_vertices_[path_number];
-    }
-
-    int GetPathNumber(std::pair<int, int> path);
-
     // Returns true if and only if vertex_end is reachable from vertex_start.
     bool IsReachable(int vertex_start, int vertex_end);
 
@@ -42,6 +36,12 @@ class MultitreeRecolorability {
     DirectedGraph path_relation_graph_;
 
     std::vector<std::pair<int, int>> path_relation_graph_vertices_;
+
+    std::pair<int, int> GetPath(int path_number) {
+        return path_relation_graph_vertices_[path_number];
+    }
+
+    int GetPathNumber(std::pair<int, int> path);
 
     void ConstructPathRelationGraph();
 
