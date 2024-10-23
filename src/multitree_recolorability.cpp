@@ -1,6 +1,8 @@
 #include "multitree_recolorability.hpp"
 
 #include <algorithm>
+#include <fstream>
+#include <iostream>
 
 namespace FTMR {
 MultitreeRecolorability::MultitreeRecolorability(const DirectedGraph &digraph)
@@ -247,5 +249,59 @@ void MultitreeRecolorability::ConstructPathRelationGraph() {
 
     path_relation_graph_ =
         DirectedGraph(edges, path_relation_graph_vertices_.size());
+}
+
+/* Outputs SCCs of the path-relation graph and the other informations */
+void MultitreeRecolorability::OutputInfoOfPathRelationGraph(
+    std::string file_name) {
+    DirectedGraph path_relation_without_cycles2 =
+        path_relation_graph_.DeleteCyclesOfLength2();
+    std::vector<std::vector<int>> strongly_connected_components =
+        path_relation_without_cycles2.StronglyConnectedComponents();
+
+    std::unordered_set<int> scc_path_numbers;
+    for (auto &component : strongly_connected_components) {
+        if (component.size() <= 1) {
+            continue;
+        }
+        scc_path_numbers.insert(component.begin(), component.end());
+    }
+
+    DirectedGraph scc_path_relation_graph = path_relation_graph_.CreateSubgraph(
+        std::vector<int>(scc_path_numbers.begin(), scc_path_numbers.end()));
+
+    OutputPathRelationGraphDot(scc_path_relation_graph,
+                               path_relation_graph_vertices_, file_name);
+
+    std::vector<std::vector<int>> simple_path_cycles =
+        path_relation_without_cycles2.SimpleCycles();
+    std::cout << "Cycle in the path-relation graph: " << std::endl;
+    int count = 0;
+    for (auto &cycle : simple_path_cycles) {
+        std::cout << "Cycle" << count << ": ";
+        for (auto &path_number : cycle) {
+            std::pair<int, int> path = GetPath(path_number);
+            std::cout << "[" << path.first << ", " << path.second << "] ";
+        }
+        std::cout << std::endl;
+        ++count;
+    }
+}
+
+void OutputPathRelationGraphDot(
+    const DirectedGraph &path_relation_graph,
+    const std::vector<std::pair<int, int>> &path_relation_graph_vertices,
+    std::string file_name) {
+    std::ofstream file(file_name);
+
+    file << "digraph {" << std::endl;
+    for (auto &edge : path_relation_graph.Edges()) {
+        std::pair<int, int> path1 = path_relation_graph_vertices[edge.first];
+        std::pair<int, int> path2 = path_relation_graph_vertices[edge.second];
+        file << "\"[" << path1.first << "," << path1.second << "]\" ->"
+             << "\"[" << path2.first << "," << path2.second << "]\";"
+             << std::endl;
+    }
+    file << "}" << std::endl;
 }
 }  // namespace FTMR

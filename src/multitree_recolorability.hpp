@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "directed_graph.hpp"
 
 namespace FTMR {
@@ -28,6 +30,8 @@ class MultitreeRecolorability {
 
     bool CheckConditionCV();
 
+    void OutputInfoOfPathRelationGraph(std::string file_name);
+
    private:
     DirectedGraph multitree_;
 
@@ -54,4 +58,11 @@ class MultitreeRecolorability {
     bool CheckConditionCVOnPathCycle(std::vector<int> path_cycle);
 };
 
+void OutputPathRelationGraphDot(
+
+    const DirectedGraph& path_relation_graph,
+
+    const std::vector<std::pair<int, int>>& path_relation_graph_vertices,
+
+    std::string file_name);
 }  // namespace FTMR
