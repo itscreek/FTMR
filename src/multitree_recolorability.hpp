@@ -47,8 +47,9 @@ class MultitreeRecolorability {
 
     int GetNextStepPathNumber(int path_number);
 
-    bool CheckConditionCPOnPath(int path_number,
-                                const std::vector<int>& component);
+    bool CheckConditionCPOnPath(
+        const DirectedGraph& path_relation_graph_without_cycles2,
+        const std::vector<int>& component, int path_number);
 
     bool CheckConditionCVOnPathCycle(std::vector<int> path_cycle);
 };

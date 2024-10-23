@@ -109,15 +109,15 @@ int MultitreeRecolorability::GetNextStepPathNumber(int path_number) {
 }
 
 bool MultitreeRecolorability::CheckConditionCP() {
-    DirectedGraph path_relation_without_cycles =
+    DirectedGraph path_relation_without_cycles2 =
         path_relation_graph_.DeleteCyclesOfLength2();
     std::vector<std::vector<int>> strongly_connected_components =
-        path_relation_without_cycles.StronglyConnectedComponents();
+        path_relation_without_cycles2.StronglyConnectedComponents();
 
     for (const auto &component : strongly_connected_components) {
         for (auto &path_number : component) {
-            bool condition_cp_on_path =
-                CheckConditionCPOnPath(path_number, component);
+            bool condition_cp_on_path = CheckConditionCPOnPath(
+                path_relation_without_cycles2, component, path_number);
             if (!condition_cp_on_path) {
                 return false;
             }
@@ -129,19 +129,21 @@ bool MultitreeRecolorability::CheckConditionCP() {
 
 /* Check (CP) for the path with "path_number" */
 bool MultitreeRecolorability::CheckConditionCPOnPath(
-    int path_number, const std::vector<int> &component) {
+    const DirectedGraph &path_relation_graph_without_cycles2,
+    const std::vector<int> &component, int path_number) {
     int next_step_path_number = GetNextStepPathNumber(path_number);
 
     // Check for all adjacent paths
     for (auto &adjacent_path_number :
-         path_relation_graph_.AdjacentVertices(path_number)) {
+         path_relation_graph_without_cycles2.AdjacentVertices(path_number)) {
         if (std::find(component.begin(), component.end(),
                       adjacent_path_number) == component.end()) {
             continue;
         }
 
         for (auto &radjacent_path_number :
-             path_relation_graph_.ReverseAdjacentVertices(path_number)) {
+             path_relation_graph_without_cycles2.ReverseAdjacentVertices(
+                 path_number)) {
             if (std::find(component.begin(), component.end(),
                           radjacent_path_number) == component.end()) {
                 continue;
