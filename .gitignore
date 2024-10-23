@@ -3,3 +3,6 @@ build/
 
 # ignore vscode settings
 .vscode/
+
+# ignore polytrees
+example/polytree_*
