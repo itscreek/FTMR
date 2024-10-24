@@ -253,7 +253,7 @@ void MultitreeRecolorability::ConstructPathRelationGraph() {
 
 /* Outputs SCCs of the path-relation graph and the other informations */
 void MultitreeRecolorability::OutputInfoOfPathRelationGraph(
-    std::string file_name) {
+    std::string file_name, bool show_cycle2) {
     DirectedGraph path_relation_without_cycles2 =
         path_relation_graph_.DeleteCyclesOfLength2();
     std::vector<std::vector<int>> strongly_connected_components =
@@ -267,8 +267,14 @@ void MultitreeRecolorability::OutputInfoOfPathRelationGraph(
         scc_path_numbers.insert(component.begin(), component.end());
     }
 
-    DirectedGraph scc_path_relation_graph = path_relation_graph_.CreateSubgraph(
-        std::vector<int>(scc_path_numbers.begin(), scc_path_numbers.end()));
+    DirectedGraph scc_path_relation_graph;
+    if (show_cycle2) {
+        scc_path_relation_graph = path_relation_graph_.CreateSubgraph(
+            std::vector<int>(scc_path_numbers.begin(), scc_path_numbers.end()));
+    } else {
+        scc_path_relation_graph = path_relation_without_cycles2.CreateSubgraph(
+            std::vector<int>(scc_path_numbers.begin(), scc_path_numbers.end()));
+    }
 
     OutputPathRelationGraphDot(scc_path_relation_graph,
                                path_relation_graph_vertices_, file_name);

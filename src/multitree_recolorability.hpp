@@ -30,7 +30,7 @@ class MultitreeRecolorability {
 
     bool CheckConditionCV();
 
-    void OutputInfoOfPathRelationGraph(std::string file_name);
+    void OutputInfoOfPathRelationGraph(std::string file_name, bool show_cycle2);
 
    private:
     DirectedGraph multitree_;
