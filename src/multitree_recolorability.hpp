@@ -28,6 +28,8 @@ class MultitreeRecolorability {
 
     bool CheckConditionCV();
 
+    bool CheckConditionNNC();
+
    private:
     DirectedGraph multitree_;
 
@@ -52,6 +54,11 @@ class MultitreeRecolorability {
         const std::vector<int>& component, int path_number);
 
     bool CheckConditionCVOnPathCycle(std::vector<int> path_cycle);
+
+    bool CheckConditionNNCOnPath(
+        const DirectedGraph& path_relation_graph_without_cycle2,
+        const std::vector<std::unordered_set<int>> componet_sets_list,
+        int path_number, int component_number);
 };
 
 }  // namespace FTMR
