@@ -252,34 +252,35 @@ bool MultitreeRecolorability::CheckConditionNNCOnPath(
         return -1;
     };
 
-    for (auto &radjacent_path_number :
+    bool single_arc = false;
+    for (auto &adjacent_path_number :
+         path_relation_graph_without_cycle2.AdjacentVertices(path_number)) {
+        if (!path_relation_graph_.IsAdjacent(adjacent_path_number,
+                                             next_step_path_number)) {
+            single_arc = true;
+            break;
+        }
+    }
+    if (!single_arc) {
+        return true;
+    }
+
+    auto &next_step_path_scc =
+        componet_sets_list[find_scc_index(next_step_path_number)];
+    if (next_step_path_scc.size() <= 1) {
+        return true;
+    }
+
+    for (auto &next_step_radjacent :
          path_relation_graph_without_cycle2.ReverseAdjacentVertices(
-             path_number)) {
-        // skip when the same cycle remains
-        if (componet_sets_list[component_number].count(radjacent_path_number) ==
-                0 ||
-            IsReachable(GetPath(next_step_path_number).first,
-                        GetPath(radjacent_path_number).second)) {
+             next_step_path_number)) {
+        if (next_step_path_scc.count(next_step_radjacent) == 0) {
             continue;
         }
 
-        auto &next_step_path_scc =
-            componet_sets_list[find_scc_index(next_step_path_number)];
-        if (next_step_path_scc.size() <= 1) {
-            continue;
-        }
-
-        for (auto &next_step_radjacent :
-             path_relation_graph_without_cycle2.ReverseAdjacentVertices(
-                 next_step_path_number)) {
-            if (next_step_path_scc.count(next_step_radjacent) == 0) {
-                continue;
-            }
-
-            if (!path_relation_graph_.IsAdjacent(next_step_radjacent,
-                                                 path_number)) {
-                return false;
-            }
+        if (!path_relation_graph_.IsAdjacent(next_step_radjacent,
+                                             path_number)) {
+            return false;
         }
     }
 
