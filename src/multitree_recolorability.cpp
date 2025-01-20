@@ -199,6 +199,94 @@ bool MultitreeRecolorability::CheckConditionCVOnPathCycle(
     return false;
 }
 
+bool MultitreeRecolorability::CheckConditionNCE() {
+    DirectedGraph path_relation_without_cycles2 =
+        path_relation_graph_.DeleteCyclesOfLength2();
+    std::vector<std::vector<int>> strongly_connected_components =
+        path_relation_without_cycles2.StronglyConnectedComponents();
+    std::vector<std::unordered_set<int>> scc_sets_list(
+        strongly_connected_components.size());
+
+    int idx = 0;
+    for (auto &component : strongly_connected_components) {
+        std::unordered_set<int> scc_set(component.begin(), component.end());
+        scc_sets_list[idx] = scc_set;
+        ++idx;
+    }
+
+    idx = 0;
+    for (auto &component : strongly_connected_components) {
+        if (component.size() <= 1) {
+            ++idx;
+            continue;
+        }
+
+        for (auto &path_number : component) {
+            bool condition_ncc_on_path = CheckConditionNCEOnPath(
+                path_relation_without_cycles2, scc_sets_list, path_number, idx);
+
+            if (!condition_ncc_on_path) {
+                return false;
+            }
+        }
+
+        ++idx;
+    }
+
+    return true;
+}
+
+bool MultitreeRecolorability::CheckConditionNCEOnPath(
+    const DirectedGraph &path_relation_graph_without_cycle2,
+    const std::vector<std::unordered_set<int>> componet_sets_list,
+    int path_number, int component_number) {
+    int next_step_path_number = GetNextStepPathNumber(path_number);
+    auto find_scc_index = [&](int path_num) {
+        int i = 0;
+        for (auto &component_set : componet_sets_list) {
+            if (component_set.count(path_num)) {
+                return i;
+            }
+            ++i;
+        }
+        return -1;
+    };
+
+    bool single_arc = false;
+    for (auto &adjacent_path_number :
+         path_relation_graph_without_cycle2.AdjacentVertices(path_number)) {
+        if (!path_relation_graph_.IsAdjacent(adjacent_path_number,
+                                             next_step_path_number)) {
+            single_arc = true;
+            break;
+        }
+    }
+    if (!single_arc) {
+        return true;
+    }
+
+    auto &next_step_path_scc =
+        componet_sets_list[find_scc_index(next_step_path_number)];
+    if (next_step_path_scc.size() <= 1) {
+        return true;
+    }
+
+    for (auto &next_step_radjacent :
+         path_relation_graph_without_cycle2.ReverseAdjacentVertices(
+             next_step_path_number)) {
+        if (next_step_path_scc.count(next_step_radjacent) == 0) {
+            continue;
+        }
+
+        if (!path_relation_graph_.IsAdjacent(next_step_radjacent,
+                                             path_number)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void MultitreeRecolorability::ConstructPathRelationGraph() {
     std::vector<std::vector<int>> path_list;
     for (auto &component : unilaterally_connected_components_) {

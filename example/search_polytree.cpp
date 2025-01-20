@@ -21,27 +21,6 @@ std::string& ProjectDirName() {
 constexpr char kTreesDataDir[] = "example/trees/";
 constexpr char kTreesFileName[] = "trees_data";
 
-enum class TypeOfPolytree {
-    kS,
-    kCPNotS,
-    kCVNotCP,
-    kNotTractable,
-};
-
-TypeOfPolytree ClassifyMultitree(const std::vector<std::pair<int, int>>& edges,
-                                 int num_vertices) {
-    FTMR::MultitreeRecolorability multitree(edges, num_vertices);
-    if (multitree.CheckConditionS()) {
-        return TypeOfPolytree::kS;
-    } else if (multitree.CheckConditionCP()) {
-        return TypeOfPolytree::kCPNotS;
-    } else if (multitree.CheckConditionCV()) {
-        return TypeOfPolytree::kCVNotCP;
-    } else {
-        return TypeOfPolytree::kNotTractable;
-    }
-}
-
 std::vector<EdgesList> GetTrees(int num_vertices) {
     std::vector<EdgesList> trees_list;
     std::string filename = ProjectDirName() + std::string(kTreesDataDir) +
@@ -111,35 +90,36 @@ EdgesList FlipEdges(const EdgesList& original, int flip_bits) {
 }
 
 void SearchAllPolytrees(int num_vertices, std::string save_dir_name,
-                        bool save_S, bool save_CP_not_S, bool save_CV_not_CP,
+                        bool save_cp, bool save_cv, bool save_nce,
                         bool save_others) {
     std::cout << "Searching all polytrees with " << num_vertices << " vertices."
               << std::endl;
     std::cout << "Running..." << std::endl;
 
     std::filesystem::path save_dir_path(save_dir_name);
-    if (save_S || save_CP_not_S || save_CV_not_CP || save_others) {
+    if (save_cp || save_cv || save_nce || save_others) {
         std::filesystem::create_directory(save_dir_path);
     }
-    std::filesystem::path S_dir_path = save_dir_path;
-    S_dir_path.append("satisfying_S");
-    std::filesystem::path CP_dir_path = save_dir_path;
-    CP_dir_path.append("satisfying_CP_not_S");
-    std::filesystem::path CV_dir_path = save_dir_path;
-    CV_dir_path.append("satisfying_CV_not_CP");
+
+    std::filesystem::path cp_dir_path = save_dir_path;
+    cp_dir_path.append("cp");
+    std::filesystem::path cv_dir_path = save_dir_path;
+    cv_dir_path.append("cv");
+    std::filesystem::path nce_dir_path = save_dir_path;
+    nce_dir_path.append("nce");
     std::filesystem::path others_dir_path = save_dir_path;
     others_dir_path.append("others");
 
-    if (save_S) {
-        std::filesystem::create_directory(S_dir_path);
+    if (save_cp) {
+        std::filesystem::create_directory(cp_dir_path);
     }
 
-    if (save_CP_not_S) {
-        std::filesystem::create_directory(CP_dir_path);
+    if (save_cv) {
+        std::filesystem::create_directory(cv_dir_path);
     }
 
-    if (save_CV_not_CP) {
-        std::filesystem::create_directory(CV_dir_path);
+    if (save_nce) {
+        std::filesystem::create_directory(nce_dir_path);
     }
 
     if (save_others) {
@@ -152,54 +132,56 @@ void SearchAllPolytrees(int num_vertices, std::string save_dir_name,
         return;
     }
 
-    int num_s = 0;
-    int num_cp_not_s = 0;
+    int num_cp = 0;
     int num_cv = 0;
+    int num_nce = 0;
     int num_not_tractable = 0;
     for (auto& edges_list : trees_list) {
         for (int flip_bits = 0; flip_bits < (1 << (num_vertices - 1));
              ++flip_bits) {
             EdgesList new_edges_list = FlipEdges(edges_list, flip_bits);
-            TypeOfPolytree type =
-                ClassifyMultitree(new_edges_list, num_vertices);
+            FTMR::MultitreeRecolorability multitree(new_edges_list,
+                                                    num_vertices);
 
-            switch (type) {
-                case TypeOfPolytree::kS:
-                    if (save_S) {
-                        std::filesystem::path file_path = S_dir_path;
-                        file_path.append("S_" + std::to_string(num_s) + ".dot");
-                        SaveGraphsDOT(new_edges_list, file_path);
-                    }
-                    ++num_s;
-                    break;
-                case TypeOfPolytree::kCPNotS:
-                    if (save_CP_not_S) {
-                        std::filesystem::path file_path = CP_dir_path;
-                        file_path.append("CP_" + std::to_string(num_cp_not_s) +
-                                         ".dot");
-                        SaveGraphsDOT(new_edges_list, file_path);
-                    }
-                    ++num_cp_not_s;
-                    break;
-                case TypeOfPolytree::kCVNotCP:
-                    if (save_CV_not_CP) {
-                        std::filesystem::path file_path = CV_dir_path;
-                        file_path.append("CV_" + std::to_string(num_cv) +
-                                         ".dot");
-                        SaveGraphsDOT(new_edges_list, file_path);
-                    }
-                    ++num_cv;
-                    break;
-                case TypeOfPolytree::kNotTractable:
-                    if (save_others) {
-                        std::filesystem::path file_path = others_dir_path;
-                        file_path.append("others_" +
-                                         std::to_string(num_not_tractable) +
-                                         ".dot");
-                        SaveGraphsDOT(new_edges_list, file_path);
-                    }
-                    ++num_not_tractable;
-                    break;
+            bool isCP = multitree.CheckConditionCP();
+            bool isCV = multitree.CheckConditionCV();
+            bool isNCE = multitree.CheckConditionNCE();
+
+            if (isCP) {
+                ++num_cp;
+                if (save_cp) {
+                    std::filesystem::path file_path = cp_dir_path;
+                    file_path.append("cp_" + std::to_string(num_cp) + ".dot");
+                    SaveGraphsDOT(new_edges_list, file_path);
+                }
+            }
+
+            if (isCV) {
+                ++num_cv;
+                if (save_cv) {
+                    std::filesystem::path file_path = cv_dir_path;
+                    file_path.append("cv_" + std::to_string(num_cv) + ".dot");
+                    SaveGraphsDOT(new_edges_list, file_path);
+                }
+            }
+
+            if (isNCE) {
+                ++num_nce;
+                if (save_nce) {
+                    std::filesystem::path file_path = nce_dir_path;
+                    file_path.append("nce_" + std::to_string(num_nce) + ".dot");
+                    SaveGraphsDOT(new_edges_list, file_path);
+                }
+            }
+
+            if (!isCP && !isCV && !isNCE) {
+                ++num_not_tractable;
+                if (save_others) {
+                    std::filesystem::path file_path = others_dir_path;
+                    file_path.append(
+                        "others_" + std::to_string(num_not_tractable) + ".dot");
+                    SaveGraphsDOT(new_edges_list, file_path);
+                }
             }
         }
     }
@@ -208,9 +190,9 @@ void SearchAllPolytrees(int num_vertices, std::string save_dir_name,
     std::cout << "Result: " << std::endl;
     std::cout << "Search " << (trees_list.size() * (1 << (num_vertices - 1)))
               << " polytrees." << std::endl;
-    std::cout << "    Satisfying (S): " << num_s << std::endl;
-    std::cout << "    Satisfying (CP) not (S): " << num_cp_not_s << std::endl;
-    std::cout << "    Satisfying (CV) not (CP): " << num_cv << std::endl;
+    std::cout << "    Satisfying (CP): " << num_cp << std::endl;
+    std::cout << "    Satysfying (CV): " << num_cv << std::endl;
+    std::cout << "    Satisfying (NCE): " << num_nce << std::endl;
     std::cout << "    Others: " << num_not_tractable << std::endl;
 }
 }  // namespace FTMRSearch
@@ -221,36 +203,33 @@ int main(int argc, char* argv[]) {
     project_dir_name += "/";
 
     int num_vertices = -1;
-    bool save_S = false;
-    bool save_CP_not_S = false;
-    bool save_CV_not_CP = false;
+    bool save_cp = false;
+    bool save_cv = false;
+    bool save_nce = false;
     bool save_others = false;
     std::string save_dir_name = "";
     for (int i = 2; i < argc; ++i) {
         if (strcmp(argv[i], "--save") == 0) {
             if (i + 1 == argc || argv[i + 1][0] == '-') {
-                save_S = true;
-                save_CP_not_S = true;
-                save_CV_not_CP = true;
                 save_others = true;
                 break;
             }
 
             for (int j = 0; argv[i + 1][j] != '\0'; ++j) {
                 char c = argv[i + 1][j];
-                if (c == 'S') {
-                    save_S = true;
-                } else if (c == 'P') {
-                    save_CP_not_S = true;
+                if (c == 'P') {
+                    save_cp = true;
                 } else if (c == 'V') {
-                    save_CV_not_CP = true;
+                    save_cv = true;
+                } else if (c == 'N') {
+                    save_nce = true;
                 } else if (c == 'O') {
                     save_others = true;
                 } else {
                     std::cout
                         << "Invalid arguments of --save option: " << argv[i + 1]
                         << std::endl;
-                    std::cout << "usage: --save [S][P][V][O]" << std::endl;
+                    std::cout << "usage: --save [S][C][O]" << std::endl;
                 }
             }
             ++i;
@@ -283,10 +262,10 @@ int main(int argc, char* argv[]) {
     }
 
     if (save_dir_name == "") {
-        save_dir_name = project_dir_name + "/example/polytree_" +
+        save_dir_name = project_dir_name + "/example/new_polytree_" +
                         std::to_string(num_vertices);
     }
 
-    FTMRSearch::SearchAllPolytrees(num_vertices, save_dir_name, save_S,
-                                   save_CP_not_S, save_CV_not_CP, save_others);
+    FTMRSearch::SearchAllPolytrees(num_vertices, save_dir_name, save_cp,
+                                   save_cv, save_nce, save_others);
 }
