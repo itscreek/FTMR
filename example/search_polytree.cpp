@@ -145,7 +145,7 @@ void SearchAllPolytrees(int num_vertices, std::string save_dir_name,
 
             bool isCP = multitree.CheckConditionCP();
             bool isCV = multitree.CheckConditionCV();
-            bool isNCE = multitree.CheckConditionNNC();
+            bool isNCE = multitree.CheckConditionNCE();
 
             if (isCP) {
                 ++num_cp;

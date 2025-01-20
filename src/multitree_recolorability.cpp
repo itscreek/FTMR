@@ -199,7 +199,7 @@ bool MultitreeRecolorability::CheckConditionCVOnPathCycle(
     return false;
 }
 
-bool MultitreeRecolorability::CheckConditionNNC() {
+bool MultitreeRecolorability::CheckConditionNCE() {
     DirectedGraph path_relation_without_cycles2 =
         path_relation_graph_.DeleteCyclesOfLength2();
     std::vector<std::vector<int>> strongly_connected_components =
@@ -222,7 +222,7 @@ bool MultitreeRecolorability::CheckConditionNNC() {
         }
 
         for (auto &path_number : component) {
-            bool condition_ncc_on_path = CheckConditionNNCOnPath(
+            bool condition_ncc_on_path = CheckConditionNCEOnPath(
                 path_relation_without_cycles2, scc_sets_list, path_number, idx);
 
             if (!condition_ncc_on_path) {
@@ -236,7 +236,7 @@ bool MultitreeRecolorability::CheckConditionNNC() {
     return true;
 }
 
-bool MultitreeRecolorability::CheckConditionNNCOnPath(
+bool MultitreeRecolorability::CheckConditionNCEOnPath(
     const DirectedGraph &path_relation_graph_without_cycle2,
     const std::vector<std::unordered_set<int>> componet_sets_list,
     int path_number, int component_number) {

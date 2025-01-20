@@ -28,7 +28,7 @@ class MultitreeRecolorability {
 
     bool CheckConditionCV();
 
-    bool CheckConditionNNC();
+    bool CheckConditionNCE();
 
    private:
     DirectedGraph multitree_;
@@ -55,7 +55,7 @@ class MultitreeRecolorability {
 
     bool CheckConditionCVOnPathCycle(std::vector<int> path_cycle);
 
-    bool CheckConditionNNCOnPath(
+    bool CheckConditionNCEOnPath(
         const DirectedGraph& path_relation_graph_without_cycle2,
         const std::vector<std::unordered_set<int>> componet_sets_list,
         int path_number, int component_number);

@@ -57,11 +57,11 @@ TEST(MultitreeRecolorabilityTest, ConditionNNC) {
     const std::vector<std::pair<int, int>> edges1 = {
         {0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {2, 7}, {8, 4}};
     MultitreeRecolorability satisfyingCV(edges1, 9);
-    ASSERT_TRUE(satisfyingCV.CheckConditionNNC());
+    ASSERT_TRUE(satisfyingCV.CheckConditionNCE());
 
     const std::vector<std::pair<int, int>> edges2 = {
         {0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {2, 8}, {9, 5}};
     MultitreeRecolorability not_satisfyingCV(edges2, 10);
-    ASSERT_TRUE(not_satisfyingCV.CheckConditionNNC());
+    ASSERT_TRUE(not_satisfyingCV.CheckConditionNCE());
 }
 }  // namespace FTMR
