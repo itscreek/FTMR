@@ -190,10 +190,10 @@ void SearchAllPolytrees(int num_vertices, std::string save_dir_name,
     std::cout << "Result: " << std::endl;
     std::cout << "Search " << (trees_list.size() * (1 << (num_vertices - 1)))
               << " polytrees." << std::endl;
-    std::cout << "    Satisfying (CP): " << num_cp << std::endl;
-    std::cout << "    Satysfying (CV): " << num_cv << std::endl;
-    std::cout << "    Satisfying (NCE): " << num_nce << std::endl;
-    std::cout << "    Others: " << num_not_tractable << std::endl;
+    std::cout << "    (CP)        : " << num_cp << std::endl;
+    std::cout << "    (CV)        : " << num_cv << std::endl;
+    std::cout << "    (NCE)       : " << num_nce << std::endl;
+    std::cout << "    None of them: " << num_not_tractable << std::endl;
 }
 }  // namespace FTMRSearch
 
